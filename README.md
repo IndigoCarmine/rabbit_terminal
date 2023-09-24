@@ -1,6 +1,7 @@
 # rabbit_terminal
 
-A new Flutter project.
+It is client-side application for rabbit robot. ROS2 is unnecessary for us to control it.
+
 
 ## Getting Started
 
