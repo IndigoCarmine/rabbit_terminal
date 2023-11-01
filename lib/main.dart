@@ -47,42 +47,44 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        body: Column(
-          children: [
-            TextField(
-              onChanged: (value) {
-                _address = value;
-              },
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                channel?.sink.close();
+        body: Center(
+          child: Column(
+            children: [
+              TextField(
+                onChanged: (value) {
+                  _address = value;
+                },
+              ),
+              ElevatedButton(
+                onPressed: () async {
+                  channel?.sink.close();
 
-                channel = IOWebSocketChannel.connect(
-                    Uri.parse('ws://$_address:8080'));
+                  channel = IOWebSocketChannel.connect(
+                      Uri.parse('ws://$_address:8080'));
 
-                if (channel == null) return;
-                await channel!.ready;
-                if (mounted) {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ControllerPage(
-                            send: channel!.sink.add,
-                            receive: channel!.stream,
-                          )));
-                }
-              },
-              child: const Text("Connect"),
-            ),
-            ElevatedButton(
-                onPressed: () {
-                  if (channel == null) {
-                    print("Channel is null");
-                  } else {
-                    channel?.sink.add("Hello${DateTime.now()}");
+                  if (channel == null) return;
+                  await channel!.ready;
+                  if (mounted) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ControllerPage(
+                              send: channel!.sink.add,
+                              receive: channel!.stream,
+                            )));
                   }
                 },
-                child: const Text("Send"))
-          ],
+                child: const Text("Connect"),
+              ),
+              ElevatedButton(
+                  onPressed: () {
+                    if (channel == null) {
+                      print("Channel is null");
+                    } else {
+                      channel?.sink.add("Hello${DateTime.now()}");
+                    }
+                  },
+                  child: const Text("Send"))
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           child: const Icon(Icons.refresh),

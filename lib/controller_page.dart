@@ -20,12 +20,12 @@ class _ControllerPageState extends State<ControllerPage> {
   bool _isActivated = false;
   Point<double> carriageMove = const Point(0, 0);
   double carriageRotate = 0;
-  final double carriageRotateScale = 5000;
-  final double carriageSpeedScale = 25000;
+  final double carriageRotateScale = 20000;
+  final double carriageSpeedScale = 35000;
   double lastLifeHeight = 0;
   Point<double> liftMove = const Point(0, 0);
   final double liftSpeedScale = 20000;
-
+  double servoAngle = 500;
   List<double> motorPositions = List.filled(6, 0);
 
   @override
@@ -75,91 +75,110 @@ class _ControllerPageState extends State<ControllerPage> {
   @override
   Widget build(BuildContext context) {
     final margin = MediaQuery.of(context).size.width / 30;
-    return Column(
-      children: [
-        Row(
-          children: [
-            ButtonBar(
-              alignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    widget.send(jsonEncode(
-                        getFormattedData(DataTypes.buttons, "StopAll")));
-                    _isActivated = false;
-                  },
-                  child: const Text("Emergency Stop"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _isActivated = true;
-                    widget.send(jsonEncode(
-                        getFormattedData(DataTypes.buttons, "ActivateAll")));
-                    motorPositions = List.filled(6, 0);
-                  },
-                  child: const Text("Activate All"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    motorPositions[4] = 0;
-                    motorPositions[5] = 0;
-                    widget.send(jsonEncode(
-                        getFormattedData(DataTypes.buttons, "LiftReset")));
-                  },
-                  child: const Text("Reset Lift"),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    widget.send(jsonEncode(getFormattedData(
-                        DataTypes.buttons, "ConnectionReflesh")));
-                  },
-                  child: const Text("Connection Reflesh"),
-                ),
-              ],
-            ),
-            const Spacer(),
-            Joystick(
-                listener: (details) {
-                  carriageRotate = details.x;
-                },
-                mode: JoystickMode.horizontal),
-          ],
-        ),
-        Expanded(
-          child: Stack(
-            fit: StackFit.expand,
+    return Material(
+      child: Column(
+        children: [
+          Row(
             children: [
-              SizedBox(
-                width: 100,
-                height: 50,
-                child: ElevatedButton(
+              ButtonBar(
+                alignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      widget.send(jsonEncode(
+                          getFormattedData(DataTypes.buttons, "StopAll")));
+                      _isActivated = false;
                     },
-                    child: const Text("Back")),
+                    child: const Text("Emergency Stop"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      _isActivated = true;
+                      widget.send(jsonEncode(
+                          getFormattedData(DataTypes.buttons, "ActivateAll")));
+                      motorPositions = List.filled(6, 0);
+                    },
+                    child: const Text("Activate All"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      motorPositions[4] = 0;
+                      motorPositions[5] = 0;
+                      widget.send(jsonEncode(
+                          getFormattedData(DataTypes.buttons, "LiftReset")));
+                    },
+                    child: const Text("Reset Lift"),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      widget.send(jsonEncode(getFormattedData(
+                          DataTypes.buttons, "ConnectionReflesh")));
+                    },
+                    child: const Text("Connection Reflesh"),
+                  ),
+                ],
               ),
-              Positioned(
-                bottom: margin,
-                left: margin,
-                child: Joystick(
+              const Spacer(),
+              Joystick(
                   listener: (details) {
-                    carriageMove = Point(details.x, details.y);
+                    carriageRotate = details.x;
                   },
-                ),
-              ),
-              Positioned(
-                bottom: margin,
-                right: margin,
-                child: Joystick(
-                  listener: (details) {
-                    liftMove = Point(details.x, details.y);
-                  },
-                ),
-              )
+                  mode: JoystickMode.horizontal),
             ],
           ),
-        ),
-      ],
+          Expanded(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                Positioned(
+                  top: margin,
+                  child: SizedBox(
+                    width: 100,
+                    height: 30,
+                    child: Center(
+                      child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: const Text("Back")),
+                    ),
+                  ),
+                ),
+                Slider(
+                  value: servoAngle,
+                  onChanged: (value) {
+                    setState(() {
+                      servoAngle = value;
+                    });
+                    widget.send(jsonEncode(
+                        getFormattedData(DataTypes.servoRotation, servoAngle)));
+                  },
+                  min: 400,
+                  max: 1200,
+                ),
+                Positioned(
+                  bottom: margin,
+                  left: margin,
+                  child: Joystick(
+                    listener: (details) {
+                      carriageMove = Point(details.x, details.y);
+                    },
+                  ),
+                ),
+                Positioned(
+                  bottom: margin,
+                  right: margin,
+                  child: Joystick(
+                    listener: (details) {
+                      liftMove = Point(details.x, details.y);
+                    },
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
